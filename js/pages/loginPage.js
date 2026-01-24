@@ -1,0 +1,141 @@
+/**
+ * 로그인 페이지
+ */
+
+import { api } from '../api.js';
+import { setUser } from '../state.js';
+import { navigateTo } from '../router.js';
+
+/**
+ * 로그인 페이지 렌더링
+ */
+export function renderLoginPage() {
+  const root = document.getElementById('app-root');
+  
+  root.innerHTML = `
+    <header class="header">
+      <h1 class="header-title">아무 말 대잔치</h1>
+      <div class="header-divider"></div>
+    </header>
+    
+    <main class="main">
+      <div class="login-container">
+        <h2 class="login-title">로그인</h2>
+        
+        <form id="login-form" class="login-form">
+          <div class="form-group">
+            <label for="email" class="form-label">이메일</label>
+            <input 
+              type="email" 
+              id="email" 
+              name="email" 
+              class="form-input" 
+              placeholder="이메일을 입력하세요"
+              required 
+            />
+          </div>
+          
+          <div class="form-group">
+            <label for="password" class="form-label">비밀번호</label>
+            <input 
+              type="password" 
+              id="password" 
+              name="password" 
+              class="form-input" 
+              placeholder="비밀번호를 입력하세요"
+              required 
+            />
+          </div>
+          
+          <span class="helper-text" id="error-message" style="display: none;"></span>
+          
+          <button type="submit" class="btn btn-primary">로그인</button>
+          
+          <button type="button" id="signup-btn" class="btn btn-secondary">
+            회원가입
+          </button>
+        </form>
+      </div>
+    </main>
+  `;
+  
+  // 이벤트 리스너 등록
+  attachLoginEvents();
+}
+
+/**
+ * 로그인 페이지 이벤트 리스너 등록
+ */
+function attachLoginEvents() {
+  const form = document.getElementById('login-form');
+  const signupBtn = document.getElementById('signup-btn');
+  
+  // 로그인 폼 제출
+  form.addEventListener('submit', handleLogin);
+  
+  // 회원가입 버튼 클릭
+  signupBtn.addEventListener('click', () => {
+    navigateTo('/signup');
+  });
+}
+
+/**
+ * 로그인 처리
+ */
+async function handleLogin(e) {
+  e.preventDefault();
+  
+  const form = e.target;
+  const formData = new FormData(form);
+  const email = formData.get('email');
+  const password = formData.get('password');
+  
+  // 입력값 검증
+  if (!email || !password) {
+    showError('이메일과 비밀번호를 입력해주세요.');
+    return;
+  }
+  
+  const submitBtn = form.querySelector('.btn-primary');
+  const originalText = submitBtn.textContent;
+  
+  try {
+    // 로딩 상태
+    submitBtn.textContent = '로그인 중...';
+    submitBtn.disabled = true;
+    
+    // 로그인 API 호출
+    const result = await api.post('/auth/login', {
+      email,
+      password
+    });
+    
+    // 사용자 정보 저장
+    if (result.user) {
+      setUser(result.user);
+    }
+    
+    // 게시글 목록으로 이동
+    navigateTo('/posts');
+    
+  } catch (error) {
+    // 에러 표시
+    const errorMessage = error.message || '로그인에 실패했습니다.';
+    showError(errorMessage);
+  } finally {
+    // 버튼 상태 복원
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+  }
+}
+
+/**
+ * 에러 메시지 표시
+ */
+function showError(message) {
+  const errorElement = document.getElementById('error-message');
+  if (errorElement) {
+    errorElement.textContent = `* ${message}`;
+    errorElement.style.display = 'block';
+  }
+}
