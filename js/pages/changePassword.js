@@ -1,0 +1,127 @@
+/**
+ * 비밀번호 변경 페이지
+ */
+
+import { api } from '../api.js';
+import { navigateTo } from '../router.js';
+import { renderHeader, initHeaderEvents } from '../components/header.js';
+import { showFieldError, clearErrors } from '../utils.js';
+
+/**
+ * 비밀번호 변경 페이지 렌더링
+ */
+export function renderChangePassword() {
+  const root = document.getElementById('app-root');
+
+  root.innerHTML = `
+    ${renderHeader()}
+    
+    <main class="main">
+      <div class="form-container">
+        <h2 class="form-title">비밀번호 수정</h2>
+        
+        <form id="form" class="form">
+          <!-- 새 비밀번호 -->
+          <div class="form-group">
+            <label for="new-password" class="form-label">비밀번호</label>
+            <input 
+              type="password" 
+              id="new-password" 
+              name="new-password" 
+              class="form-input" 
+              placeholder="비밀번호를 입력하세요"
+              required 
+            />
+            <span class="helper-text" id="new-password-error">*helper text</span>
+          </div>
+          
+          <!-- 새 비밀번호 확인 -->
+          <div class="form-group">
+            <label for="new-password-confirm" class="form-label">비밀번호 확인</label>
+            <input 
+              type="password" 
+              id="new-password-confirm" 
+              name="new-password-confirm" 
+              class="form-input" 
+              placeholder="비밀번호를 한번 더 입력하세요"
+              required 
+            />
+            <span class="helper-text" id="new-password-confirm-error">*helper text</span>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">수정하기</button>
+        </form>
+      </div>
+    </main>
+  `;
+
+  // 이벤트 리스너 등록
+  initHeaderEvents();
+  attachChangePasswordEvents();
+}
+
+/**
+ * 비밀번호 변경 페이지 이벤트 리스너 등록
+ */
+function attachChangePasswordEvents() {
+  const form = document.getElementById('form');
+  if (form) {
+    form.addEventListener('submit', handleChangePassword);
+  }
+}
+
+/**
+ * 비밀번호 변경 처리
+ */
+async function handleChangePassword(e) {
+  e.preventDefault();
+
+  clearErrors();
+
+  const form = e.target;
+  const newPassword = document.getElementById('new-password').value;
+  const newPasswordConfirm = document.getElementById('new-password-confirm')
+    .value;
+
+  let hasError = false;
+
+  if (!newPassword) {
+    showFieldError('new-password-error', '비밀번호를 입력해주세요.');
+    hasError = true;
+  } else if (newPassword.length < 8) {
+    showFieldError('new-password-error', '비밀번호는 8자 이상이어야 합니다.');
+    hasError = true;
+  }
+
+  if (newPassword !== newPasswordConfirm) {
+    showFieldError(
+      'new-password-confirm-error',
+      '비밀번호가 일치하지 않습니다.',
+    );
+    hasError = true;
+  }
+
+  if (hasError) return;
+
+  const submitBtn = form.querySelector('.btn-primary');
+  const originalText = submitBtn.textContent;
+
+  try {
+    submitBtn.textContent = '변경 중...';
+    submitBtn.disabled = true;
+
+    // 비밀번호 변경 API 호출
+    await api.put('/auth/password', {
+      newPassword,
+    });
+
+    alert('비밀번호가 변경되었습니다!');
+    navigateTo('/posts');
+  } catch (error) {
+    const errorMessage = error.message || '비밀번호 변경에 실패했습니다.';
+    alert(errorMessage);
+  } finally {
+    submitBtn.textContent = originalText;
+    submitBtn.disabled = false;
+  }
+}
