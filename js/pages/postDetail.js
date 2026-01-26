@@ -537,6 +537,14 @@ function attachPostBodyEvents(postId) {
         const commentId = editBtn.dataset.commentId;
         const commentItem = editBtn.closest('.comment-item');
         if (!commentItem) return;
+        
+        // 이미 수정 폼이 있는지 확인
+        const existingForm = commentItem.querySelector('.comment-edit-form');
+        if (existingForm) {
+          // 이미 수정 모드면 아무 동작 안 함
+          return;
+        }
+        
         const contentEl = commentItem.querySelector('.comment-content');
         if (!contentEl) return;
         const content = contentEl.textContent.trim();

@@ -421,21 +421,53 @@ body {
 .avatar-wrapper {
   width: 130px;
   height: 130px;
+  min-width: 130px;
+  min-height: 130px;
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 0px auto 0;
+  flex-shrink: 0; /* 크기 고정 */
 }
 
 /* 프로필 사진 원형 컨테이너 */
 .avatar {
-  width: 130px;
-  height: 130px;
+  width: 130px !important;
+  height: 130px !important;
+  min-width: 130px !important;
+  min-height: 130px !important;
+  max-width: 130px !important;
+  max-height: 130px !important;
+  aspect-ratio: 1 / 1 !important; /* 정사각형 보장 */
   border-radius: 50%;
   background-color: #C4C4C4;
   position: relative;
+  overflow: hidden; /* 이미지가 원형 밖으로 나가지 않도록 */
+  flex-shrink: 0; /* 크기 고정 */
   /* 원의 다른 영역에서는 커서가 손가락이 안 보이게 */
   cursor: default;
+  /* 버튼 스타일 오버라이드 */
+  padding: 0 !important;
+  border: none !important;
+}
+
+/* 회원가입 페이지의 프로필 이미지 스타일 */
+.avatar img {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  object-fit: cover;
+  object-position: center; /* 이미지 중앙 정렬 */
+  border-radius: 50%;
+  display: block;
+  /* 타원형 방지: 정사각형 강제 */
+  aspect-ratio: 1 / 1;
+}
+
+/* 회원가입 페이지(.avatar만 있고 .profile-edit-avatar는 없는 경우)에서만 '변경' 버튼 숨기기 */
+.avatar:not(.profile-edit-avatar) .profile-edit-avatar-change {
+  display: none !important;
 }
 
 /* 프로필 사진 추가 아이콘 (+) */
@@ -449,7 +481,7 @@ body {
   transform: translate(-50%, -50%);
   /* + 아이콘 부근에서만 손가락 커서 표시 */
   cursor: pointer;
-  z-index: 10;
+  z-index: 20; /* 이미지와 어두운 레이어 위에 표시 */
 }
 
 /* + 아이콘 가로선 */

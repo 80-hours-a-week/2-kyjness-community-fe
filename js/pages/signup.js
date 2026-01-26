@@ -28,11 +28,12 @@ export function renderSignup() {
 
            <div class="avatar-wrapper">
             <div class="btn avatar" id="signup-avatar-preview">
-             <div class="plus"></div>
              <img
                id="avatar-img"
-               style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;"
+               style="display: none;"
              />
+             <!-- + 아이콘은 항상 표시 (사진이 있어도) -->
+             <div class="plus" id="plus-icon"></div>
             </div>
 
             <input
@@ -132,8 +133,10 @@ function attachSignupEvents() {
     navigateTo('/login');
   });
 
-  // + 아이콘 클릭 시 파일 선택 (+ 아이콘 부근에서만 클릭 가능)
-  const plusIcon = document.querySelector('.plus');
+  const plusIcon = document.getElementById('plus-icon');
+  const avatarPreview = document.getElementById('signup-avatar-preview');
+
+  // + 아이콘 클릭 시 파일 선택
   if (plusIcon) {
     plusIcon.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -141,31 +144,39 @@ function attachSignupEvents() {
     });
   }
 
-  // 원의 다른 영역 클릭 시 아무 동작 안 함
-  const avatarPreview = document.getElementById('signup-avatar-preview');
+  // 이미지가 있을 때 이미지 클릭 시에도 파일 선택 가능
+  if (avatarImg) {
+    avatarImg.addEventListener('click', (e) => {
+      e.stopPropagation();
+      profileInput.click();
+    });
+  }
+
+  // 원의 다른 영역 클릭 시 아무 동작 안 함 (이미지나 + 아이콘이 아닌 경우)
   if (avatarPreview) {
     avatarPreview.addEventListener('click', (e) => {
-      // + 아이콘이 아닌 영역을 클릭한 경우에만 이벤트 전파 중단
-      if (e.target !== plusIcon && !plusIcon.contains(e.target)) {
+      // + 아이콘이나 이미지가 아닌 영역을 클릭한 경우에만 이벤트 전파 중단
+      if (e.target !== plusIcon && !plusIcon.contains(e.target) && e.target !== avatarImg) {
         e.stopPropagation();
-        // 아무 동작 안 함
       }
     });
   }
 
   // 프로필 사진 선택 시 미리보기
-  profileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        avatarImg.src = event.target.result;
-        avatarImg.style.display = 'block';
-        document.querySelector('.plus').style.display = 'none';
-      };
-      reader.readAsDataURL(file);
-    }
-  });
+  if (profileInput) {
+    profileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          avatarImg.src = event.target.result;
+          avatarImg.style.display = 'block';
+          // + 아이콘은 계속 표시 (사진이 있어도)
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
 }
 
 /**
