@@ -6,6 +6,7 @@ import { api } from '../api.js';
 import { navigateTo } from '../router.js';
 import { renderHeader, initHeaderEvents } from '../components/header.js';
 import { renderPostCard } from '../components/postCard.js';
+import { DEV_MODE } from '../constants.js';
 
 /**
  * 게시글 목록 렌더링
@@ -63,10 +64,15 @@ async function loadPostList() {
     }
 
     if (!posts || posts.length === 0) {
-      // 테스트용: 게시물이 없으면 더미 데이터로 상세 페이지 테스트
-      const testPostId = 1;
-      console.log('게시물이 없어서 테스트 게시물 상세 페이지로 이동합니다...');
-      navigateTo(`/posts/${testPostId}`);
+      // 개발 모드에서만: 게시물이 없으면 더미 데이터로 상세 페이지 테스트
+      if (DEV_MODE) {
+        const testPostId = 1;
+        console.log('게시물이 없어서 테스트 게시물 상세 페이지로 이동합니다...');
+        navigateTo(`/posts/${testPostId}`);
+        return;
+      }
+      listContainer.innerHTML = `
+        <p class="post-list-message">게시글이 없습니다.</p>`;
       return;
     }
 

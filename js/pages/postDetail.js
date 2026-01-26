@@ -5,7 +5,7 @@
 import { api } from '../api.js';
 import { navigateTo } from '../router.js';
 import { renderHeader, initHeaderEvents } from '../components/header.js';
-import { DEFAULT_PROFILE_IMAGE } from '../constants.js';
+import { DEFAULT_PROFILE_IMAGE, DEV_MODE } from '../constants.js';
 
 /** 해시(#/posts/123)에서 postId 추출 */
 function getPostIdFromHash() {
@@ -186,8 +186,8 @@ function closeModal(modal) {
    게시글 상세 데이터 로딩
    ========================= */
 
-// 개발 모드: API 실패 시 더미 데이터 표시 여부 (배포 시 false로 변경)
-const DEV_MODE_DUMMY = true;
+// 개발 모드: API 실패 시 더미 데이터 표시 여부 (DEV_MODE와 연동)
+const DEV_MODE_DUMMY = DEV_MODE;
 
 async function loadPostDetail(postId) {
   const card = document.getElementById('post-detail-card');
