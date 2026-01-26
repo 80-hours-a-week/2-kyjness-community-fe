@@ -48,6 +48,7 @@ async function loadPostList() {
   try {
     // API 호출
     const response = await api.get('/posts');
+    
 
     // API 응답 구조: { code: "POSTS_RETRIEVED", data: [...] } 또는 배열
     const postsData = response.data || response;
@@ -62,15 +63,15 @@ async function loadPostList() {
     }
 
     if (!posts || posts.length === 0) {
-      listContainer.innerHTML = `
-        <p class="post-list-message">게시글이 없습니다.</p>`;
+      // 테스트용: 게시물이 없으면 더미 데이터로 상세 페이지 테스트
+      const testPostId = 1;
+      console.log('게시물이 없어서 테스트 게시물 상세 페이지로 이동합니다...');
+      navigateTo(`/posts/${testPostId}`);
       return;
     }
 
     // postCard 컴포넌트 사용
-    listContainer.innerHTML = posts
-      .map((post) => renderPostCard(post))
-      .join('');
+    listContainer.innerHTML = posts.map(post => renderPostCard(post)).join('');
   } catch (e) {
     console.error('게시글 조회 실패:', e);
     listContainer.innerHTML = `

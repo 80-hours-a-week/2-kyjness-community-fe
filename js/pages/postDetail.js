@@ -187,7 +187,7 @@ function closeModal(modal) {
    ========================= */
 
 // 개발 모드: API 실패 시 더미 데이터 표시 여부 (배포 시 false로 변경)
-const DEV_MODE_DUMMY = false;
+const DEV_MODE_DUMMY = true;
 
 async function loadPostDetail(postId) {
   const card = document.getElementById('post-detail-card');
