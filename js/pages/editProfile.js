@@ -5,8 +5,8 @@
 import { api } from '../api.js';
 import { getUser, setUser, clearUser } from '../state.js';
 import { navigateTo } from '../router.js';
-import { renderHeader, initHeaderEvents } from '../components/header.js';
-import { fileToBase64 } from '../utils.js';
+import { renderHeader, initHeaderEvents, updateHeaderProfileImage } from '../components/header.js';
+import { fileToBase64, escapeHtml } from '../utils.js';
 import { DEFAULT_PROFILE_IMAGE } from '../constants.js';
 
 /**
@@ -76,7 +76,7 @@ export function renderEditProfile() {
               id="nickname"
               name="nickname"
               class="form-input"
-              value="${user?.nickname || ''}"
+              value="${escapeHtml(String(user?.nickname || ''))}"
             />
             <!-- 항상 보이는 helper text (오타 없이) -->
             <span class="helper-text" id="nickname-error">*helper text</span>
@@ -184,7 +184,7 @@ function attachEditProfileEvents() {
     });
   }
 
-  // 프로필 사진 선택 시 미리보기
+  // 프로필 사진 선택 시 미리보기 (회원정보 수정 페이지 + 헤더 모두 업데이트)
   if (profileInput && avatarImg) {
     profileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -192,7 +192,14 @@ function attachEditProfileEvents() {
 
       const reader = new FileReader();
       reader.onload = (event) => {
-        avatarImg.src = event.target.result;
+        const imageDataUrl = event.target.result;
+        // 회원정보 수정 페이지의 프로필 이미지 업데이트
+        avatarImg.src = imageDataUrl;
+        // 헤더의 프로필 이미지도 즉시 업데이트 (미리보기)
+        const headerProfileImg = document.querySelector('.profile-avatar-img');
+        if (headerProfileImg) {
+          headerProfileImg.src = imageDataUrl;
+        }
       };
       reader.readAsDataURL(file);
     });
@@ -258,11 +265,14 @@ async function handleProfileUpdate(e) {
       payload.profileImage = await fileToBase64(file);
     }
 
-    // 백엔드의 내 정보 수정 API
-    const updatedUser = await api.put('/users/me', payload);
+    // 백엔드의 내 정보 수정 API (응답이 { user } 형태이면 user 사용)
+    const res = await api.put('/users/me', payload);
+    const updatedUser = res?.user ?? res;
 
     if (updatedUser) {
       setUser(updatedUser); // 상태에 저장
+      // 헤더의 프로필 이미지도 즉시 업데이트
+      updateHeaderProfileImage();
     }
 
     alert('회원정보가 수정되었습니다.');
