@@ -20,8 +20,7 @@ export function renderPostCard(post) {
   const author = post.author || {};
 
   const authorName = author.nickname || '알 수 없음';
-  const authorAvatar =
-    author.profileImageUrl || author.profileImage || DEFAULT_PROFILE_IMAGE;
+  const authorAvatar = author.profileImageUrl || DEFAULT_PROFILE_IMAGE;
 
   return `
     <div class="post-card" data-id="${postId}">

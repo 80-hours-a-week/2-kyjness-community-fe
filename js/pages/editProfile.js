@@ -6,7 +6,7 @@ import { api } from '../api.js';
 import { getUser, setUser, clearUser } from '../state.js';
 import { navigateTo } from '../router.js';
 import { renderHeader, initHeaderEvents, updateHeaderProfileImage } from '../components/header.js';
-import { fileToBase64, escapeHtml } from '../utils.js';
+import { escapeHtml } from '../utils.js';
 import { DEFAULT_PROFILE_IMAGE } from '../constants.js';
 
 /**
@@ -37,7 +37,7 @@ export function renderEditProfile() {
                 <div class="avatar-img-wrapper">
                   <img
                     id="avatar-img"
-                    src="${user?.profileImage || user?.profileImageUrl || DEFAULT_PROFILE_IMAGE}"
+                    src="${user?.profileImageUrl || DEFAULT_PROFILE_IMAGE}"
                     alt="프로필 이미지"
                   />
                 </div>
@@ -253,27 +253,35 @@ async function handleProfileUpdate(e) {
     return;
   }
 
+  const user = getUser();
+  const userId = user?.userId;
+  if (!userId) {
+    alert('로그인 정보가 없습니다.');
+    return;
+  }
+
   try {
     submitBtn.disabled = true;
     submitBtn.textContent = '수정 중...';
 
-    const payload = { nickname };
+    let profileImageUrl = user?.profileImageUrl;
 
-    // 프로필 이미지 선택된 경우 Base64로 전송
+    // 프로필 이미지 선택된 경우 먼저 업로드 (POST /users/me/profile-image)
     const file = document.getElementById('profile-image').files[0];
     if (file) {
-      payload.profileImage = await fileToBase64(file);
+      const formData = new FormData();
+      formData.append('profileImage', file);
+      const uploadRes = await api.postFormData('/users/me/profile-image', formData);
+      profileImageUrl = uploadRes?.data?.profileImageUrl ?? uploadRes?.profileImageUrl;
     }
 
-    // 백엔드의 내 정보 수정 API (응답이 { user } 형태이면 user 사용)
-    const res = await api.put('/users/me', payload);
-    const updatedUser = res?.user ?? res;
+    const payload = { nickname };
+    if (profileImageUrl != null) payload.profileImageUrl = profileImageUrl;
 
-    if (updatedUser) {
-      setUser(updatedUser); // 상태에 저장
-      // 헤더의 프로필 이미지도 즉시 업데이트
-      updateHeaderProfileImage();
-    }
+    await api.patch('/users/me', payload);
+
+    setUser({ ...user, nickname, profileImageUrl });
+    updateHeaderProfileImage();
 
     alert('회원정보가 수정되었습니다.');
     navigateTo('/posts');
@@ -290,6 +298,12 @@ async function handleProfileUpdate(e) {
  */
 async function handleDeleteAccount() {
   const deleteModal = document.getElementById('delete-modal');
+  const user = getUser();
+  const userId = user?.userId;
+  if (!userId) {
+    alert('로그인 정보가 없습니다.');
+    return;
+  }
 
   try {
     await api.delete('/users/me');
