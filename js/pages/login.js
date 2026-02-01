@@ -143,7 +143,7 @@ async function handleLogin(e) {
         userId: data.userId,
         email: data.email,
         nickname: data.nickname,
-        profileImageUrl: data.profileImage ?? data.profileImageUrl,
+        profileImageUrl: data.profileImageUrl,
       });
     }
 

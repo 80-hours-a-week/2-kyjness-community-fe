@@ -5,7 +5,7 @@
 
 // 전역 상태 객체
 const state = {
-  user: null, // 로그인한 사용자 정보 { id, email, nickname, profileImageUrl }
+  user: null, // 로그인한 사용자 정보 { userId, email, nickname, profileImageUrl }
   isLoggedIn: false, // 로그인 여부
 };
 
@@ -49,8 +49,8 @@ export function clearUser() {
 }
 
 /**
- * 로컬 스토리지에서 사용자 정보를 복원합니다
- * 페이지 새로고침 시 로그인 상태 유지를 위해 사용
+ * 표시용 사용자 정보만 로컬 스토리지에서 복원 (UI용).
+ * 실제 인증 여부는 서버(쿠키 세션) 기준. localStorage는 인증 수단이 아님.
  */
 export function restoreUser() {
   const userJson = localStorage.getItem('user');

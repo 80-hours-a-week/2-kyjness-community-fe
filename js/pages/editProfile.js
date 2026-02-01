@@ -37,7 +37,7 @@ export function renderEditProfile() {
                 <div class="avatar-img-wrapper">
                   <img
                     id="avatar-img"
-                    src="${user?.profileImage || user?.profileImageUrl || DEFAULT_PROFILE_IMAGE}"
+                    src="${user?.profileImageUrl || DEFAULT_PROFILE_IMAGE}"
                     alt="프로필 이미지"
                   />
                 </div>
@@ -264,21 +264,21 @@ async function handleProfileUpdate(e) {
     submitBtn.disabled = true;
     submitBtn.textContent = '수정 중...';
 
-    let profileImageUrl = user?.profileImageUrl ?? user?.profileImage;
+    let profileImageUrl = user?.profileImageUrl;
 
-    // 프로필 이미지 선택된 경우 먼저 업로드 (POST /users/{userId}/profile-image)
+    // 프로필 이미지 선택된 경우 먼저 업로드 (POST /users/me/profile-image)
     const file = document.getElementById('profile-image').files[0];
     if (file) {
       const formData = new FormData();
       formData.append('profileImage', file);
-      const uploadRes = await api.postFormData(`/users/${userId}/profile-image`, formData);
+      const uploadRes = await api.postFormData('/users/me/profile-image', formData);
       profileImageUrl = uploadRes?.data?.profileImageUrl ?? uploadRes?.profileImageUrl;
     }
 
     const payload = { nickname };
     if (profileImageUrl != null) payload.profileImageUrl = profileImageUrl;
 
-    await api.patch(`/users/${userId}`, payload);
+    await api.patch('/users/me', payload);
 
     setUser({ ...user, nickname, profileImageUrl });
     updateHeaderProfileImage();
@@ -306,7 +306,7 @@ async function handleDeleteAccount() {
   }
 
   try {
-    await api.delete(`/users/${userId}`);
+    await api.delete('/users/me');
     clearUser();
     closeDeleteModal(deleteModal);
     alert('회원 탈퇴가 완료되었습니다.');

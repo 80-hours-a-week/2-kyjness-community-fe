@@ -124,8 +124,7 @@ async function handleChangePassword(e) {
   if (hasError) return;
 
   const user = getUser();
-  const userId = user?.userId;
-  if (!userId) {
+  if (!user?.userId) {
     alert('로그인 정보가 없습니다.');
     return;
   }
@@ -137,7 +136,7 @@ async function handleChangePassword(e) {
     submitBtn.textContent = '변경 중...';
     submitBtn.disabled = true;
 
-    await api.patch(`/users/${userId}/password`, {
+    await api.patch('/users/me/password', {
       currentPassword,
       newPassword,
     });

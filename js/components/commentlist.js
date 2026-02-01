@@ -30,13 +30,11 @@ export function renderCommentList(comments) {
  */
 function renderCommentItem(comment) {
   const currentUser = getUser();
-  const isAuthor = currentUser && currentUser.id === comment.author?.id;
+  const isAuthor = currentUser && currentUser.userId === comment.author?.userId;
 
   const authorName = comment.author?.nickname || '알 수 없음';
   const authorAvatar =
-    comment.author?.profileImageUrl ||
-    comment.author?.profileImage ||
-    DEFAULT_PROFILE_IMAGE;
+    comment.author?.profileImageUrl || DEFAULT_PROFILE_IMAGE;
   const createdAt = comment.createdAt || comment.created_at || '';
 
   return `

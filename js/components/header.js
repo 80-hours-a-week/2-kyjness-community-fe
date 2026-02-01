@@ -23,8 +23,7 @@ export function renderHeader(options = {}) {
     showProfile = true,
   } = options;
   const user = getUser();
-  const profileImage =
-    user?.profileImage || user?.profileImageUrl || DEFAULT_PROFILE_IMAGE;
+  const profileImage = user?.profileImageUrl || DEFAULT_PROFILE_IMAGE;
 
   return `
     <header class="header">
@@ -105,8 +104,7 @@ export function updateHeaderProfileImage() {
   const profileImg = document.querySelector('.profile-avatar-img');
   if (profileImg) {
     const user = getUser();
-    const profileImage =
-      user?.profileImage || user?.profileImageUrl || DEFAULT_PROFILE_IMAGE;
+    const profileImage = user?.profileImageUrl || DEFAULT_PROFILE_IMAGE;
     profileImg.src = profileImage;
   }
 }

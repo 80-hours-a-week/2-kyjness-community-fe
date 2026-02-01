@@ -249,9 +249,7 @@ async function loadPostDetail(postId) {
       content: postData.content || '',
       author_nickname: postData.author?.nickname || '',
       author_profile_image:
-        postData.author?.profileImageUrl ||
-        postData.author?.profileImage ||
-        DEFAULT_PROFILE_IMAGE,
+        postData.author?.profileImageUrl || DEFAULT_PROFILE_IMAGE,
       created_at: postData.createdAt || '',
       image_url: postData.file?.fileUrl || postData.file?.url || null,
       likes: postData.likeCount || 0,
@@ -269,7 +267,7 @@ async function loadPostDetail(postId) {
           id: c.commentId,
           author_nickname: c.author?.nickname || '',
           author_profile_image:
-            c.author?.profileImageUrl || c.author?.profileImage || null,
+            c.author?.profileImageUrl || DEFAULT_PROFILE_IMAGE,
           created_at: c.createdAt || '',
           content: c.content || '',
           isMine: c.isMine || false,

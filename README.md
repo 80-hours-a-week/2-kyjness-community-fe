@@ -1,220 +1,150 @@
-# 아무 말 대잔치 - 커뮤니티 프론트엔드
+# PuppyTalk - 커뮤니티 프론트엔드
 
-바닐라 JavaScript로 만든 간단한 커뮤니티 웹사이트입니다.  
-게시글 작성, 댓글, 좋아요 등 기본적인 커뮤니티 기능을 제공합니다.
+바닐라 JavaScript로 만든 커뮤니티 웹 프론트엔드입니다.  
+회원가입, 게시글, 댓글, 좋아요, 프로필 수정 등 기능을 제공하며, 백엔드 API(`2-kyjness-community-be`)와 통신합니다.
 
 ---
 
-## 🚀 빠른 시작 (실행 방법)
+## 이 앱이 하는 일
 
-### 1단계: 백엔드 서버 실행
+| 기능 | 설명 |
+|------|------|
+| **인증** | 회원가입, 로그인, 로그아웃. 로그인 상태는 `localStorage`와 쿠키로 유지됩니다. |
+| **게시글** | 목록 보기, 상세 보기, 작성, 수정, 삭제 |
+| **댓글** | 댓글 보기, 작성, 수정, 삭제 |
+| **좋아요** | 게시글에 좋아요 추가/취소 |
+| **프로필** | 닉네임·프로필 이미지 수정, 비밀번호 변경 |
 
-백엔드 서버가 먼저 실행되어 있어야 합니다.
+---
+
+## 사용 기술
+
+- **HTML5, CSS3** – 페이지 구조와 스타일
+- **JavaScript (ES6+)** – ES Modules, `async/await`, `fetch` API
+- **백엔드** – FastAPI (PuppyTalk API)
+
+---
+
+## 실행 방법
+
+### 1. 백엔드 서버 실행
+
+프론트엔드는 백엔드 API를 호출하므로, **백엔드가 먼저 실행**되어 있어야 합니다.
 
 ```bash
-# 백엔드 프로젝트 폴더로 이동
 cd ../2-kyjness-community-be
-
-# 백엔드 서버 실행 (포트 8000)
-uvicorn main:app --reload --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-백엔드 서버가 `http://localhost:8000`에서 실행되면 다음 단계로 진행하세요.
+백엔드가 `http://localhost:8000`에서 떠 있으면 다음 단계로 진행하세요.
 
-### 2단계: 프론트엔드 실행
+### 2. 프론트엔드 실행
 
-프론트엔드는 정적 파일이므로 간단한 웹 서버만 있으면 됩니다.
+프론트엔드는 정적 파일이므로 웹 서버로 띄우면 됩니다.
 
-#### 방법 1: VS Code Live Server (가장 쉬움) ⭐
+**방법 1: VS Code Live Server (권장)**
 
 1. VS Code에서 이 프로젝트 폴더를 엽니다
-2. `index.html` 파일을 우클릭합니다
-3. **"Open with Live Server"**를 선택합니다
-4. 자동으로 브라우저가 열리고 `http://127.0.0.1:5500` (또는 다른 포트)에서 실행됩니다
+2. `index.html` 우클릭 → **Open with Live Server**
+3. 브라우저에서 `http://127.0.0.1:5500` (또는 표시된 주소)로 열립니다
 
-> **참고**: Live Server 확장이 설치되어 있지 않다면 VS Code 확장 마켓에서 "Live Server"를 검색해 설치하세요.
+> Live Server 확장이 없다면 VS Code 확장 마켓에서 "Live Server"를 검색해 설치하세요.
 
-#### 방법 2: Python 내장 서버
+**방법 2: Python 내장 서버**
 
 ```bash
-# Python 3가 설치되어 있어야 합니다
 python -m http.server 8080
 ```
 
 브라우저에서 `http://localhost:8080` 접속
 
-#### 방법 3: Node.js http-server
+**방법 3: Node.js http-server**
 
 ```bash
-# http-server 설치 (최초 1회만)
 npm install -g http-server
-
-# 서버 실행
 http-server . -p 8080
 ```
 
 브라우저에서 `http://localhost:8080` 접속
 
+> `index.html`을 파일로 직접 열면 CORS·모듈 로딩 문제가 생길 수 있습니다. 반드시 웹 서버를 통해 열어주세요.
+
 ---
 
-## 📁 폴더 구조
-
-프로젝트는 다음과 같이 구성되어 있습니다:
+## 폴더 구조
 
 ```
 2-kyjness-community-fe/
 │
-├── index.html          # 메인 HTML 파일 (이것 하나만 사용)
+├── index.html              # 메인 HTML (SPA 기반, 이 파일 하나로 모든 화면 렌더)
 │
-├── css/               # 스타일 파일
-│   ├── base.css      # 기본 스타일 (리셋, 폰트, 색상 등)
-│   └── app.css       # 앱 전용 스타일
+├── css/
+│   ├── base.css            # 기본 스타일 (리셋, 폰트, 색상)
+│   └── app.css             # 앱 전용 스타일
 │
-├── img/               # 이미지·로티 애니 리소스
-│   ├── anim1.json, anim2.json, anim3.json  # 스플래시 로티
-│   └── imt.png       # 기본 프로필 이미지
+├── img/                    # 정적 이미지·애니메이션
+│   ├── anim1.json, anim2.json, anim3.json  # 스플래시 Lottie
+│   └── imt.png             # 기본 프로필 이미지
 │
-└── js/                # JavaScript 파일
+└── js/
+    ├── main.js             # 앱 진입점 (초기화)
+    ├── router.js           # 라우팅 (#/login, #/posts, #/posts/1 등)
+    ├── api.js              # 백엔드 API 호출 (fetch, credentials: 'include')
+    ├── state.js            # 로그인 상태 관리 (localStorage)
+    ├── constants.js        # 상수 (BASE_URL, DEFAULT_PROFILE_IMAGE, DEV_MODE)
+    ├── utils.js            # 공통 함수 (날짜 포맷, 에러 메시지 표시)
     │
-    ├── main.js       # 시작점 (앱 초기화)
-    ├── router.js     # 페이지 이동 관리 (#/login, #/posts 등)
-    ├── api.js        # 백엔드 API 호출
-    ├── state.js      # 로그인 상태 관리
-    ├── constants.js  # 상수 (API 주소, 기본 이미지 등)
-    ├── utils.js      # 공통 함수 (날짜 포맷, 에러 표시 등)
-    │
-    ├── pages/        # 각 페이지 파일
-    │   ├── login.js          # 로그인 페이지
-    │   ├── signup.js         # 회원가입 페이지
-    │   ├── postList.js       # 게시글 목록
-    │   ├── postDetail.js     # 게시글 상세보기
-    │   ├── newPost.js        # 게시글 작성
-    │   ├── editPost.js       # 게시글 수정
-    │   ├── editProfile.js    # 프로필 수정
+    ├── pages/              # 페이지별 렌더 로직
+    │   ├── login.js        # 로그인
+    │   ├── signup.js       # 회원가입
+    │   ├── postList.js     # 게시글 목록
+    │   ├── postDetail.js   # 게시글 상세
+    │   ├── newPost.js      # 게시글 작성
+    │   ├── editPost.js     # 게시글 수정
+    │   ├── editProfile.js  # 프로필 수정
     │   └── changePassword.js # 비밀번호 변경
     │
-    └── components/    # 재사용 가능한 UI 컴포넌트
-        ├── header.js      # 상단 헤더 (프로필 메뉴 포함)
-        ├── postCard.js    # 게시글 카드
-        └── commentlist.js # 댓글 목록
+    └── components/         # 재사용 UI 컴포넌트
+        ├── header.js       # 상단 헤더 (프로필 메뉴)
+        ├── postCard.js     # 게시글 카드
+        └── commentlist.js  # 댓글 목록
 ```
 
-### 주요 파일 설명
+**파일 역할**
 
-- **`index.html`**: 실제로 보이는 HTML은 이것 하나뿐입니다. 나머지 화면은 JavaScript로 동적으로 만들어집니다.
-- **`js/main.js`**: 앱이 시작될 때 가장 먼저 실행되는 파일입니다.
-- **`js/router.js`**: URL 주소(`#/posts`, `#/login` 등)를 보고 어떤 페이지를 보여줄지 결정합니다.
-- **`js/api.js`**: 백엔드 서버와 통신하는 함수들이 모여있습니다.
-- **`js/pages/`**: 각 페이지(로그인, 게시글 목록 등)를 만드는 파일들입니다.
-- **`js/components/`**: 여러 페이지에서 공통으로 사용하는 작은 UI 조각들입니다.
-
----
-
-## ✨ 주요 기능
-
-### 🔐 인증
-- **회원가입**: 이메일, 비밀번호, 닉네임으로 계정 생성
-- **로그인**: 이메일과 비밀번호로 로그인
-- **로그아웃**: 로그인 상태 해제
-- **자동 로그인 유지**: 새로고침해도 로그인 상태 유지
-
-### 📝 게시글
-- **목록 보기**: 모든 게시글을 카드 형태로 보기
-- **상세 보기**: 게시글 내용, 댓글, 좋아요 확인
-- **작성**: 제목과 내용으로 새 게시글 작성
-- **수정**: 내가 작성한 게시글 수정
-- **삭제**: 내가 작성한 게시글 삭제
-
-### 💬 댓글
-- **댓글 보기**: 게시글에 달린 댓글 목록 보기
-- **댓글 작성**: 게시글에 댓글 달기
-- **댓글 수정**: 내가 작성한 댓글 수정
-- **댓글 삭제**: 내가 작성한 댓글 삭제
-
-### ❤️ 좋아요
-- **좋아요 추가/취소**: 게시글에 좋아요 누르기
-
-### 👤 프로필
-- **프로필 수정**: 닉네임, 프로필 이미지 변경
-- **비밀번호 변경**: 비밀번호 변경
+| 파일 | 역할 |
+|------|------|
+| `index.html` | 단일 HTML. 화면 전환은 JavaScript가 `#` 해시 라우팅으로 처리 |
+| `main.js` | 앱 시작 시 라우터·이벤트 초기화 |
+| `router.js` | `#/posts`, `#/login` 등 URL에 따라 해당 페이지 렌더 |
+| `api.js` | 백엔드 호출. 모든 요청에 `credentials: 'include'`로 쿠키 포함 |
 
 ---
 
-## 🔧 설정 변경
+## 설정
 
-### API 주소 변경
+### API 주소
 
-백엔드 서버 주소를 변경하려면 `js/constants.js` 파일을 수정하세요:
+백엔드 주소를 바꾸려면 `js/constants.js`를 수정하세요.
 
 ```javascript
-// js/constants.js
-export const BASE_URL = 'http://localhost:8000'; // 여기를 변경
+export const BASE_URL = 'http://localhost:8000';
 ```
 
-### 개발 모드
+### 개발 모드 (DEV_MODE)
 
-개발 중에는 인증 체크를 건너뛰고 싶을 수 있습니다. `js/constants.js`에서 설정할 수 있습니다:
+`js/constants.js`에서 `DEV_MODE`를 `true`로 두면 인증 없이 페이지 접근이 가능합니다. (테스트용)
 
 ```javascript
-// js/constants.js
-export const DEV_MODE = true; // true: 인증 체크 안 함, false: 인증 체크 함
+export const DEV_MODE = false;  // 배포 시 반드시 false로 설정
 ```
 
-**주의**: 배포·제출할 때는 반드시 `DEV_MODE`를 `false`로 바꾸세요. 그렇지 않으면 인증이 생략되고, API 실패 시 더미 데이터가 노출됩니다.
-
 ---
 
-## 🛠 기술 스택
+## 문제 해결
 
-- **HTML5**: 웹 페이지 구조
-- **CSS3**: 스타일링
-- **JavaScript (ES6+)**: 모든 기능 구현
-  - ES Modules (`import`/`export`)
-  - `async`/`await` (비동기 처리)
-  - `fetch` API (서버 통신)
-- **백엔드**: FastAPI (Python)
-
----
-
-## 📝 코드 작성 규칙
-
-1. **모든 JavaScript는 ES Modules 사용** (`import`/`export`)
-2. **API 호출은 반드시 `api.js`를 통해** (`fetch` 직접 사용 금지)
-3. **상수는 `constants.js`에 정의** (하드코딩 금지)
-4. **공통 함수는 `utils.js`에 정의** (중복 코드 방지)
-5. **컴포넌트는 재사용 가능하게** 작성
-
----
-
-## ❓ 문제 해결
-
-### 백엔드 서버에 연결할 수 없습니다
-
-1. 백엔드 서버가 실행 중인지 확인하세요 (`http://localhost:8000`)
-2. `js/constants.js`의 `BASE_URL`이 올바른지 확인하세요
-3. 브라우저 콘솔(F12)에서 에러 메시지를 확인하세요
-
-### 페이지가 제대로 표시되지 않습니다
-
-1. 브라우저 콘솔(F12)에서 JavaScript 에러를 확인하세요
-2. Live Server가 제대로 실행 중인지 확인하세요
-3. `index.html`을 직접 열지 말고 웹 서버를 통해 열어야 합니다
-
-### 로그인이 안 됩니다
-
-1. 백엔드 서버가 실행 중인지 확인하세요
-2. `DEV_MODE`가 `true`로 설정되어 있으면 인증 없이도 접근 가능합니다
-3. 브라우저 콘솔에서 에러 메시지를 확인하세요
-
----
-
-## 📄 라이선스
-
-MIT License
-
----
-
-## 👥 기여
-
-이 프로젝트는 학습 목적으로 제작되었습니다.  
-버그 리포트나 개선 제안은 이슈로 등록해주세요!
+| 현상 | 확인할 것 |
+|------|------------|
+| API 연결 안 됨 | 1) 백엔드가 `http://localhost:8000`에서 실행 중인지 2) `BASE_URL`이 맞는지 3) CORS_ORIGINS에 프론트 주소가 포함됐는지 |
+| 화면이 안 뜸 | 1) 파일을 직접 열지 말고 웹 서버(Live Server 등)로 열었는지 2) 브라우저 콘솔(F12) 에러 확인 |
+| 로그인 안 됨 | 1) 백엔드 실행 여부 2) 쿠키가 전달되려면 `credentials: 'include'`가 API 호출에 들어가는지 확인 |
