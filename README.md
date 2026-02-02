@@ -71,6 +71,102 @@ http-server . -p 8080
 
 ---
 
+## 요청·화면이 처리되는 흐름 (전체 아키텍처)
+
+사용자 동작부터 화면 렌더링·API 호출까지, 어떤 순서로 어떤 개념이 적용되는지 정리했습니다.
+
+### 1. 전체 흐름도
+
+```
+[사용자]  클릭, 폼 제출, URL 직접 입력 등
+    │
+    ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│  프론트엔드 (Vanilla JS SPA)                                             │
+│                                                                         │
+│  ① 앱 진입 (DOMContentLoaded)                                           │
+│     └─ main.js: 스플래시(Lottie) → initApp()                             │
+│     └─ restoreUser(): localStorage에서 로그인 정보 복원 (표시용)          │
+│     └─ initRouter(): hashchange 리스너 등록, route() 호출                │
+│                                                                         │
+│  ② 라우터 (router.js)                                                    │
+│     └─ parseHash(): #/posts/123 → { path: '/posts/:id', params: {id:'123'} }
+│     └─ 인증 체크: authRequiredRoutes 포함 시 isLoggedIn() 확인            │
+│     └─ Lazy Loading: routeLoaders[path]() → import('./pages/postDetail.js') │
+│     └─ 페이지 렌더: mod.renderPostDetail(params)                         │
+│                                                                         │
+│  ③ 페이지 (pages/*.js)                                                   │
+│     └─ root.innerHTML = renderHeader() + main 콘텐츠                     │
+│     └─ initHeaderEvents(), attachPostListEvents() 등 이벤트 바인딩       │
+│     └─ api.get('/posts') 등 API 호출 → 데이터 수신 후 DOM 갱신           │
+│                                                                         │
+│  ④ API 클라이언트 (api.js)                                               │
+│     └─ fetch(BASE_URL + endpoint, { credentials: 'include' })            │
+│     └─ 401 시: clearUser() + navigateTo('/login')                        │
+│     └─ 응답: { code, data } 파싱 후 반환                                 │
+│                                                                         │
+│  ⑤ 백엔드 API (2-kyjness-community-be)                                   │
+│     └─ 쿠키 포함 요청 처리 → JSON 응답                                   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+    │
+    ▼
+[화면 갱신]  사용자가 결과 확인
+```
+
+### 2. 계층별 역할과 적용 개념
+
+| 계층         | 역할                      |
+| ---------- | ----------------------- |
+| SPA        | 단일 HTML에서 JS로 화면 전환 처리  |
+| Router     | 해시 기반 라우팅 및 인증 필요 여부 판단 |
+| Pages      | 화면 렌더링 및 이벤트 바인딩        |
+| API Client | `fetch` 래퍼, 쿠키 포함 요청 처리 |
+| State      | 로그인 상태 관리(표시용)          |
+| Components | 재사용 가능한 UI 조각           |
+
+### 3. 요청·화면 처리 예시 (게시글 목록)
+
+- 라우팅: `#/posts` 접근 시 게시글 목록 페이지로 전환
+- 렌더링: 목록 화면 구성 및 이벤트 바인딩
+- 처리: `/posts` API 호출 후 응답 데이터로 화면 갱신
+- 이동: 게시글 클릭 시 상세 페이지로 이동
+
+### 4. 예시: 로그인 후 게시글 작성
+
+```
+사용자: 로그인 폼 제출
+    │
+    ├─ login.js: form submit 이벤트
+    ├─ api.post('/auth/login', { email, password })  ← credentials: 'include'
+    ├─ 백엔드: 세션 생성 → Set-Cookie: session_id=xxx
+    ├─ 응답 { code: 'LOGIN_SUCCESS', data: { userId, nickname, ... } }
+    ├─ setUser(data) → state 업데이트 + localStorage 저장
+    ├─ navigateTo('/posts')  → hash 변경 → postList 렌더
+    │
+사용자: "게시글 작성" 버튼 클릭
+    │
+    ├─ navigateTo('/posts/new')
+    ├─ authRequiredRoutes 포함 → isLoggedIn() true → 통과
+    ├─ renderNewPost() → 폼 렌더
+    │
+사용자: 폼 제출
+    │
+    ├─ api.post('/posts', { title, content })  ← 쿠키 자동 포함 (session_id)
+    ├─ 백엔드: get_current_user → session_id로 user_id 확인 → create_post
+    └─ 성공 시 navigateTo('/posts') 또는 상세 페이지로 이동
+```
+
+### 5. 프론트·백엔드 연결 요약
+
+| 개념 | 프론트엔드 | 백엔드 |
+|------|-----------|--------|
+| **인증** | localStorage는 표시용. 실제 인증은 쿠키(session_id) | Cookie의 session_id → sessions 테이블 조회 |
+| **API 호출** | `api.get/post(...)` 모든 요청에 `credentials: 'include'` | CORS `allow_credentials=True`, `allow_origins`에 프론트 URL 포함 |
+| **응답 형식** | `{ code, data }` 파싱 후 code별 분기 | 모든 응답을 `{ code, data }`로 통일 |
+
+---
+
 ## 폴더 구조
 
 ```
