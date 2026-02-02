@@ -471,7 +471,7 @@
    ============================================ */
 .post-new-container .form-container {
   max-width: 590px;
-  padding-bottom: 120px;  /* 수정하기/완료 버튼 아래 여유 공간 */
+  padding-bottom: 100px;  /* 수정하기/완료 버튼 아래 여유 공간 */
 }
 
 .new-post-form .form-input {
